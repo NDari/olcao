@@ -481,8 +481,8 @@ subroutine makeSCFPot (totalEnergy,inDat)
                ! These functions have been converted to subroutines because the
                !   return value of the second array index value was 0.0 on the
                !   ia64 HP-UX machine sirius.  This seems to work.
-               call wignerXC(exchCorrRho(1,j),currentExchCorrPot(1:2))
-               call wignerXCEnergy(exchCorrRho(2,j),currentExchCorrPot(3))
+               call wignerXC(exchCorrRho(1,j),currentExchCorrPot(1))
+               call wignerXCEnergy(exchCorrRho(:,j),currentExchCorrPot(2:3))
                do k = 1,3
                   exchCorrPot(:potDim,k) = exchCorrPot(:potDim,k) + &
                         & radialWeight(j) * currentExchCorrPot(k) * &
@@ -915,7 +915,7 @@ subroutine wignerXC (rho,answer)
 
    ! Define dummy variable passed to this function and the return value.
    real (kind=double) :: rho
-   real (kind=double), dimension (2) :: answer
+   real (kind=double) :: answer
 
    ! Define local variables used in this function
    real (kind=double) :: rho13
@@ -930,9 +930,8 @@ subroutine wignerXC (rho,answer)
    rho13Factor = (1.0_double + 12.57_double * rho13)
 
    ! Determine the XC potential(1) and energy(2) via the Wigner method.
-   answer(1) = -rho13 * (0.984_double + &
+   answer = -rho13 * (0.984_double + &
          & (0.943656_double + 8.8963_double * rho13) / (rho13Factor)**2)
-   answer(2) = -0.738_double * rho13 * (1.0_double + 0.959_double / rho13Factor)
 
 !   answer(1) = -rho13 * (Wtemp(1) + &
 !         & (0.943656_double + 8.8963_double * rho13) / (rho13Factor)**2)
@@ -948,18 +947,25 @@ subroutine wignerXCEnergy (rho,answer)
    implicit none
 
    ! Define dummy variable passed to this function and the return value.
-   real (kind=double) :: rho ! Core rho.
-   real (kind=double) :: answer
+   real (kind=double), dimension(2) :: rho ! Vale and core rho.
+   real (kind=double), dimension(2) :: answer
 
    ! Define local variables used in this function
    real (kind=double) :: rho13 ! rho^(1/3)
+   real (kind=double) :: rho13_c ! rho^(1/3)
+   real (kind=double) :: rho13factor
 
 ! 0.738 = 3/4 * 2/(pi*alpha*rs) * 0.5  (Hartree).
 
    ! Determine the XC energy via the Wigner method.
-   rho13 = rho**0.3333333333333333333_double ! rho^(1/3)
-   answer = -0.738_double * rho13 * (1.0_double + 0.959_double / &
-         & (1.0_double + 12.57_double * rho13))
+   rho13 = rho(1)**0.3333333333333333333_double ! rho^(1/3)
+   rho13Factor = (1.0_double + 12.57_double * rho13)
+
+   rho13_c = rho(2)**0.3333333333333333333_double ! rho^(1/3)
+
+   answer(1) = -0.738_double * rho13 * (1.0_double + 0.959_double / rho13Factor)
+   answer(2) = -0.738_double * rho13_c * (1.0_double + 0.959_double / &
+         & (1.0_double + 12.57_double * rho13_c))
 
 !   rho13 = rho**Wtemp(3)
 !   answer = Wtemp(2) * rho13 * (1.0_double + 0.959_double / &
