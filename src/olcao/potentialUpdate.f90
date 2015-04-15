@@ -112,7 +112,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
    call timeStampStart (18)
     
    if (XC_CODE == 990) then
-       open(unit=213, file='ann_weights', status='old')
+       open(unit=213, file='XC_Weights', status='old')
        do i = 1, 4
           read (213, *) annWeights(:,i)
        end do
@@ -560,7 +560,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
       elseif (XC_CODE == 990) then
             ! wigner XC approaximated by an ANN.
             do j = 1, numRayPoints
-               call ANN_Wigner(exchCorrRho(1,j), annWeights, currentExchCorrPot(1)
+               call ANN_Wigner(exchCorrRho(1,j), annWeights, currentExchCorrPot(1))
                ! the energy for the vale and core are not (yet) approaximated by
                ! the ann.
                call wignerXCEnergy(exchCorrRho(:,j),currentExchCorrPot(2:3))
@@ -569,6 +569,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
                         & radialWeight(j) * currentExchCorrPot(k) * &
                         & exchRhoOp(:potDim,j)
                enddo
+            end do
       endif
    enddo
 
@@ -1853,7 +1854,22 @@ end function g2
 
 subroutine ANN_Wigner(rho, annWeights, answer)
 
-!!!!!!!!
+    ! dummy parameters.
+    real (kind=double), intent(in) :: rho
+    real (kind=double), dimension(2,4), intent(in) :: annWeights
+    real (kind=double), intent(inout) :: answer
+
+    ! declare local variables
+    real (kind=double) :: input
+    real (kind=double) :: output
+
+    ! transform rho to an input between 0 and 1.
+    input = ((2.0_double * rho)/1000.0_double) - 1.0_double
+
+    output = tanh(sum(annWeights(2,:) * tanh(annWeights(1,:) * input)))
+
+    ! transform output to the xc potential
+    answer = (((output + 1.0_double) * (-21.0256_double)) / 2.0_double) - 0.2306_double
 
 end subroutine ANN_Wigner
 

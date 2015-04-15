@@ -907,7 +907,7 @@ sub runTask
       {$taskEdge = "";}
 
    ###### copy xc_weights to intermediate directory
-   system("cp xc_weights $temp); 
+   system("cp XC_Weights $temp"); 
 
    # Change the working directory to the intermediate location.
    chdir $temp;
