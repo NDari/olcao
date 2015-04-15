@@ -94,6 +94,8 @@ subroutine makeSCFPot (totalEnergy,inDat)
    real (kind=double), allocatable, dimension (:)   :: averageDelta
    real (kind=double), allocatable, dimension (:)   :: maxDelta
    real (kind=double), allocatable, dimension (:)   :: typesMagneticMoment
+   
+   real (kind=double), dimension(2,4)               :: annWeights
 
    real (kind=double) :: th1
    real (kind=double) :: th2
@@ -108,6 +110,14 @@ subroutine makeSCFPot (totalEnergy,inDat)
 
    ! Log the date and time we start.
    call timeStampStart (18)
+    
+   if (XC_CODE == 990) then
+       open(unit=213, file='ann_weights', status='old')
+       do i = 1, 4
+          read (213, *) annWeights(:,i)
+       end do
+       close(213)
+   end if
 
    ! Allocate space for a temporary array that will hold various incarnations
    !   of the various overlap matrices.
@@ -547,6 +557,18 @@ subroutine makeSCFPot (totalEnergy,inDat)
                         & exchRhoOp(:potDim,j)
                enddo
             enddo
+      elseif (XC_CODE == 990) then
+            ! wigner XC approaximated by an ANN.
+            do j = 1, numRayPoints
+               call ANN_Wigner(exchCorrRho(1,j), annWeights, currentExchCorrPot(1)
+               ! the energy for the vale and core are not (yet) approaximated by
+               ! the ann.
+               call wignerXCEnergy(exchCorrRho(:,j),currentExchCorrPot(2:3))
+               do k = 1,3
+                  exchCorrPot(:potDim,k) = exchCorrPot(:potDim,k) + &
+                        & radialWeight(j) * currentExchCorrPot(k) * &
+                        & exchRhoOp(:potDim,j)
+               enddo
       endif
    enddo
 
@@ -1793,6 +1815,7 @@ subroutine oldEXCORR(rh,sold,rhc,answer)
    answer(4) = excrc
 
 end subroutine oldEXCORR
+
 !
 !*************************************************************
 !
@@ -1826,6 +1849,13 @@ function g2(x)
       g2=g2*b
    endif
 end function g2
+
+
+subroutine ANN_Wigner(rho, annWeights, answer)
+
+!!!!!!!!
+
+end subroutine ANN_Wigner
 
 
 subroutine cleanUpPotentialUpdate

@@ -906,6 +906,9 @@ sub runTask
    if ("$taskName" eq "$setup")
       {$taskEdge = "";}
 
+   ###### copy xc_weights to intermediate directory
+   system("cp xc_weights $temp); 
+
    # Change the working directory to the intermediate location.
    chdir $temp;
 
