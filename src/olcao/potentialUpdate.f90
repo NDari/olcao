@@ -95,7 +95,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
    real (kind=double), allocatable, dimension (:)   :: maxDelta
    real (kind=double), allocatable, dimension (:)   :: typesMagneticMoment
    
-   real (kind=double), dimension(2,4)               :: annWeights
+   real (kind=double), dimension(2,8)               :: annWeights
 
    real (kind=double) :: th1
    real (kind=double) :: th2
@@ -113,7 +113,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
     
    if (XC_CODE == 990) then
        open(unit=213, file='XC_Weights', status='old')
-       do i = 1, 4
+       do i = 1, 8
           read (213, *) annWeights(:,i)
        end do
        close(213)
@@ -1856,7 +1856,7 @@ subroutine ANN_Wigner(rho, annWeights, answer)
 
     ! dummy parameters.
     real (kind=double), intent(in) :: rho
-    real (kind=double), dimension(2,4), intent(in) :: annWeights
+    real (kind=double), dimension(2,8), intent(in) :: annWeights
     real (kind=double), intent(inout) :: answer
 
     ! declare local variables
