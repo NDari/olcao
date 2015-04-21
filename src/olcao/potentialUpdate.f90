@@ -95,7 +95,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
    real (kind=double), allocatable, dimension (:)   :: maxDelta
    real (kind=double), allocatable, dimension (:)   :: typesMagneticMoment
    
-   real (kind=double), dimension(2,8)               :: annWeights
+   real (kind=double), dimension(2,2)               :: annWeights
 
    real (kind=double) :: th1
    real (kind=double) :: th2
@@ -113,7 +113,7 @@ subroutine makeSCFPot (totalEnergy,inDat)
     
    if (XC_CODE == 990) then
        open(unit=213, file='XC_Weights', status='old')
-       do i = 1, 8
+       do i = 1, 2
           read (213, *) annWeights(:,i)
        end do
        close(213)
@@ -1856,7 +1856,7 @@ subroutine ANN_Wigner(rho, annWeights, answer)
 
     ! dummy parameters.
     real (kind=double), intent(in) :: rho
-    real (kind=double), dimension(2,8), intent(in) :: annWeights
+    real (kind=double), dimension(2,2), intent(in) :: annWeights
     real (kind=double), intent(inout) :: answer
 
     ! declare local variables
@@ -1864,12 +1864,12 @@ subroutine ANN_Wigner(rho, annWeights, answer)
     real (kind=double) :: output
 
     ! transform rho to an input between 0 and 1.
-    input = ((2.0_double * rho)/1000.0_double) - 1.0_double
+    !input = ((2.0_double * rho)/1000.0_double) - 1.0_double
 
-    output = tanh(sum(annWeights(2,:) * tanh(annWeights(1,:) * input)))
+    answer = tanh(sum(annWeights(2,:) * tanh(annWeights(1,:) * rho)))
 
     ! transform output to the xc potential
-    answer = (((output + 1.0_double) * (-21.0256_double)) / 2.0_double) - 0.2306_double
+    !answer = (((output + 1.0_double) * (-21.0256_double)) / 2.0_double) - 0.2306_double
 
 end subroutine ANN_Wigner
 
