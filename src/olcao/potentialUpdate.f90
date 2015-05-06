@@ -110,6 +110,9 @@ subroutine makeSCFPot (totalEnergy,inDat)
 
    ! Log the date and time we start.
    call timeStampStart (18)
+
+   open(unit=214, file='rho_inputs', status = 'unknown')
+   open(unit=215, file='xc_outputs', status = 'unknown')
     
    if (XC_CODE == 990) then
        open(unit=213, file='XC_Weights', status='old')
@@ -925,6 +928,8 @@ subroutine makeSCFPot (totalEnergy,inDat)
 
    ! Log the date and time we end.
    call timeStampEnd (18)
+   close(214)
+   close(215)
 
 end subroutine makeSCFPot
 
@@ -1865,8 +1870,11 @@ subroutine ANN_Wigner(rho, annWeights, answer)
 
     ! transform rho to an input between 0 and 1.
     !input = ((2.0_double * rho)/1000.0_double) - 1.0_double
+    write (214, *) rho
 
-    answer = tanh(sum(annWeights(2,:) * tanh(annWeights(1,:) * rho)))
+    answer = (sum(annWeights(2,:) * tanh(annWeights(1,:) * rho)))
+
+    write (215, *) answer
 
     ! transform output to the xc potential
     !answer = (((output + 1.0_double) * (-21.0256_double)) / 2.0_double) - 0.2306_double
